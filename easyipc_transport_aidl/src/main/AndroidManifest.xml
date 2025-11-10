@@ -3,12 +3,12 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <application>
         <service
-            android:name=".MyService"
+            android:name=".EasyIpcService"
             android:enabled="true"
             android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
-                <action android:name="com.hghuangggeng.easyipc_transport_aidl.MyService" />
+                <action android:name="com.hghuangggeng.easyipc_transport_aidl.EasyIpcService" />
             </intent-filter>
         </service>
     </application>

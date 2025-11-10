@@ -13,13 +13,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import com.hghghgh.text.TestCallParamsProtocol
 import com.hghuangggeng.democlient.ui.theme.EasyIPCTheme
-import com.hghuangggeng.easyipc_transport_aidl_client.MyServiceConnection
+import com.hghuangggeng.easyipc_transport_aidl_client.EasyIpcServiceConnection
 
 class MainActivity : ComponentActivity() {
 
-    private var connection: MyServiceConnection? = null
+    private var connection: EasyIpcServiceConnection? = null
     private var count = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -37,9 +36,9 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         val intent = Intent()
-        intent.action = "com.hghuangggeng.easyipc_transport_aidl.MyService"
+        intent.action = "com.hghuangggeng.easyipc_transport_aidl.EasyIpcService"
         intent.setPackage("com.hghuangggeng.demoserver")
-        connection = MyServiceConnection()
+        connection = EasyIpcServiceConnection()
         bindService(intent, connection!!, BIND_AUTO_CREATE).also {
             Log.i("TAG", "bindService:$it")
         }
