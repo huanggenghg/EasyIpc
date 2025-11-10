@@ -20,9 +20,6 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "EasyIPC"
-//include(":app")
-//include(":app_client")
-//include(":app_server")
 include(":easyipc_core")
 include(":easyipc_processor")
 include(":easyipc_annotations")
