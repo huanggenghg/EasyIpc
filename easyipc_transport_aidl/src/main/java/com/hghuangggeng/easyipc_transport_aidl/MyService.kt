@@ -7,9 +7,13 @@ import android.os.Parcelable
 import android.os.RemoteCallbackList
 import android.os.RemoteException
 import android.util.Log
+import com.hghuangggeng.easyipc_annotations.IMethodRegistry
 import com.huanggenghg.easyipc_transport_aidl.Ipc
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.Date
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MyService : Service() {
 
     private val receiveListeners = RemoteCallbackList<IReceiveMsgListener>()
@@ -17,6 +21,12 @@ class MyService : Service() {
     override fun onBind(intent: Intent): IBinder {
         return MyBinder()
     }
+
+    @Inject
+    lateinit var ipcManager: IpcMethodManager
+
+    @Inject
+    lateinit var registries: Set<@JvmSuppressWildcards IMethodRegistry>
 
     inner class MyBinder: IMsgManager.Stub() {
         override fun sendMsg(msg: Msg?) {
@@ -85,13 +95,22 @@ class MyService : Service() {
                 }
             }
 
+            val map = mutableMapOf<String, String>()
+            registries.forEach { // todo 分发
+                it.register(map)
+            }
+            map.forEach {
+                Log.i(TAG, "registerMap: ${it.key} ${it.value}")
+            }
+
+
             // Step 3: 反射调用实际业务方法
 //            val serviceInstance = getServiceByName(request.serviceName) // 查找实际的服务实现对象
 //            val result = ReflectionUtil.invokeMethod(serviceInstance, methodName, actualParams)
 //
 //            // Step 4: 封装响应并返回
 //            val response = buildSuccessResponse(request.requestId, result)
-            return Ipc.IpcResponse.newBuilder().setResultType("ok").build().toByteArray()
+             return Ipc.IpcResponse.newBuilder().setResultType("ok").build().toByteArray()
         }
     }
 

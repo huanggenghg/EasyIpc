@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.android.library) apply false
     id("com.google.protobuf") version "0.9.5" apply false
     id("com.google.devtools.ksp") version "2.2.10-2.0.2" apply false
+    id("com.google.dagger.hilt.android") version "2.57.1" apply false
     kotlin("jvm") version "2.2.10" apply false
 }
 

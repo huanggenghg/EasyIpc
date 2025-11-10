@@ -14,6 +14,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 
 class IpcDataVisitor(private val environment: SymbolProcessorEnvironment) : KSVisitorVoid() {
     override fun visitClassDeclaration(classDeclaration: KSClassDeclaration, data: Unit) {
+        environment.logger.warn("visitClassDeclaration:")
         val originalClassName = classDeclaration.simpleName.asString()
         val originalPackageName = classDeclaration.packageName.asString()
 

@@ -5,6 +5,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("kotlin-parcelize")
     id("com.google.protobuf") version "0.9.5"
+    id("com.google.devtools.ksp") version "2.2.10-2.0.2"// 引入ksp插件
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -100,7 +102,11 @@ dependencies {
     implementation("io.grpc:grpc-kotlin-stub:1.3.0")
 
     implementation("com.squareup.moshi:moshi-kotlin:1.15.0")
-// 如果需要运行时反射支持
+    // 如果需要运行时反射支持
     implementation("com.squareup.moshi:moshi-kotlin-codegen:1.15.0")
     implementation(project(":easyipc_annotations"))//引入刚才新建的ksp model
+
+
+    implementation("com.google.dagger:hilt-android:2.57.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.57.1")
 }

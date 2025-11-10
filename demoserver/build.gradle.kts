@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     id("com.google.devtools.ksp") version "2.2.10-2.0.2"// 引入ksp插件
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -59,6 +60,10 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation(project(":easyipc_transport_aidl"))
-    implementation(project(":easyipc_processor"))//引入刚才新建的ksp model
+    api(project(":easyipc_processor"))//引入刚才新建的ksp model
     ksp(project(":easyipc_processor"))
+
+    // 上述生成代码需要
+    implementation("com.google.dagger:hilt-android:2.57.1")
+    ksp("com.google.dagger:hilt-android-compiler:2.57.1")
 }
