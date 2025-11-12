@@ -1,4 +1,4 @@
-package com.hghuangggeng.easyipc_transport_aidl
+package com.hghuangggeng.easyipc_core
 
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.adapter

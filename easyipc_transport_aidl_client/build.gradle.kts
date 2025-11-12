@@ -63,5 +63,5 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
-    api(project(":easyipc_transport_aidl"))
+    api(project(":easyipc_core"))
 }

@@ -1,6 +1,7 @@
-package com.hghuangggeng.easyipc_transport_aidl
+package com.hghuangggeng.easyipc_core
 
 import com.google.protobuf.ByteString
+import com.hghuangggeng.easyipc_annotations.Constants
 import com.hghuangggeng.easyipc_annotations.IpcData
 import com.huanggenghg.easyipc_transport_aidl.Ipc
 import java.util.UUID
@@ -22,7 +23,7 @@ object IpcCallUtils {
             // Step 2: 内部参数序列化 (假设使用 JSON)
             var rawParamBytes: ByteArray
             if (p.javaClass.isAnnotationPresent(IpcData::class.java)) {
-                val adaptP = adaptToProtocol(p)
+                val adaptP = adaptToIpcDataWrapper(p)
                 requestBuilder.addParameterTypes(adaptP?.javaClass?.name)
                 rawParamBytes = SerializationUtils.toBytes(adaptP)
             } else {
@@ -36,20 +37,13 @@ object IpcCallUtils {
         return request.toByteArray()
     }
 
-    /**
-     * 通用映射函数：使用反射动态调用替代类的 fromOriginal 伴生方法。
-     */
-    private fun adaptToProtocol(original: Any): Any? {
+    private fun adaptToIpcDataWrapper(original: Any): Any? {
         val originalClass = original.javaClass
-        val protocolPackage = "com.hghghgh.text"
-
-        // 动态构建替代类的全限定名 (FQCN)
-        val protocolClassName = "$protocolPackage.${originalClass.simpleName}Protocol"
-
-        val protocolCompanionObject = Class.forName(protocolClassName).kotlin.companionObject
-
-        return protocolCompanionObject?.memberFunctions?.find { func ->
-            func.name == "fromOriginal"
-        }?.call(protocolCompanionObject.objectInstance, original)
+        val ipcDataWrapperClassName =
+            "${Constants.GENERATED_PACKAGE_NAME}.${originalClass.simpleName}_${Constants.GENERATED_IPC_DATA_WRAPPER_SUFFIX}"
+        val ipcDataWrapperObject = Class.forName(ipcDataWrapperClassName).kotlin.companionObject
+        return ipcDataWrapperObject?.memberFunctions?.find { func ->
+            func.name == Constants.GENERATED_IPC_DATA_WRAPPER_FUNC_FROM_ORIGINAL
+        }?.call(ipcDataWrapperObject.objectInstance, original)
     }
 }

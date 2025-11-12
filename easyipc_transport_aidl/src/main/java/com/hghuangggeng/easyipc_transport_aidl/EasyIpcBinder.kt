@@ -1,13 +1,32 @@
 package com.hghuangggeng.easyipc_transport_aidl
 
+import android.content.Context
 import android.os.RemoteCallbackList
 import android.util.Log
 import com.hghuangggeng.easyipc_annotations.IMethodRegistry
-import com.huanggenghg.easyipc_transport_aidl.Ipc
+import com.hghuangggeng.easyipc_core.BaseEasyIpcServer
+import com.hghuangggeng.easyipc_core.IEasyIpcServer
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import kotlin.jvm.java
 
-class EasyIpcBinder(private val registries: Set<IMethodRegistry>) : IEasyIpcService.Stub() {
+class EasyIpcBinder(private val context: Context) : IEasyIpcService.Stub() {
 
     private val remoteCallbackList = RemoteCallbackList<IEasyIpcCallback>()
+    private val easyIpcServer: IEasyIpcServer = BaseEasyIpcServer() // todo di
+
+
+    init {
+
+//        val map = mutableMapOf<String, String>()
+//        hiltEntryPoin
+//        hiltEntryPoint.().register(map)
+//        map.forEach {
+//            Log.i(TAG, "map:${it.key}:${it.value}")
+//        }
+    }
 
     override fun registerCallback(callback: IEasyIpcCallback?) {
         remoteCallbackList.register(callback).also {
@@ -23,57 +42,25 @@ class EasyIpcBinder(private val registries: Set<IMethodRegistry>) : IEasyIpcServ
     }
 
     override fun invoke(requestData: ByteArray?): ByteArray? {
-        // Step 1: 外部反序列化 RpcRequest 容器
-        val request = Ipc.IpcRequest.parseFrom(requestData)
+        // todo 分发
+        val entryPoint = EntryPointAccessors.fromApplication(
+            context,
+            CoreEntryPoint::class.java
+        )
 
-        val methodName = request.methodName
-        val paramTypes = request.parameterTypesList
-        val paramBytes = request.parametersList
-
-        val actualParams = mutableListOf<Any>()
-
-        // Step 2: 参数类型识别与反序列化（核心反射步骤）
-        for (i in paramTypes.indices) {
-            val className = paramTypes[i]
-            val bytes = paramBytes[i].toByteArray()
-            try {
-                // B. 使用内部序列化工具反序列化具体参数
-                val paramInstance = SerializationUtils.fromBytesByClassName(bytes, className) // todo 限制同意包下类，需扩展任意包下// 在转化为原始类进行调用
-                paramInstance?.let {
-                    actualParams.add(it)
-                }
-
-            } catch (e: ClassNotFoundException) {
-                // 处理约定类不存在的错误
-//                    return buildErrorResponse(request.requestId, "Class not found: $className").toByteArray()
-                return null
-            } catch (e: Exception) {
-                // 处理反序列化错误
-//                    return buildErrorResponse(request.requestId, "Deserialization failed: ${e.message}").toByteArray()
-                return null
-            }
-        }
-
+        // 手动获取集合
         val map = mutableMapOf<String, String>()
-        registries.forEach { // todo 分发
+        entryPoint.methodRegistries().forEach {
             it.register(map)
         }
         map.forEach {
-            Log.i(TAG, "registerMap: ${it.key} ${it.value}")
+            Log.i(TAG, "${it.key}:${it.value}")
         }
-
-
-        // Step 3: 反射调用实际业务方法
-//            val serviceInstance = getServiceByName(request.serviceName) // 查找实际的服务实现对象
-//            val result = ReflectionUtil.invokeMethod(serviceInstance, methodName, actualParams)
-//
-//            // Step 4: 封装响应并返回
-//            val response = buildSuccessResponse(request.requestId, result)
-        return Ipc.IpcResponse.newBuilder().setResultType("ok").build().toByteArray()
-
+        easyIpcServer.onInvoke(requestData)
+        return null
     }
 
     companion object {
-        private const val TAG= "EasyIpcBinder"
+        private const val TAG = "EasyIpcBinder"
     }
 }

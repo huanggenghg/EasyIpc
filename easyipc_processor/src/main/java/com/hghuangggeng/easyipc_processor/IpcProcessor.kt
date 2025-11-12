@@ -31,7 +31,7 @@ class IpcProcessor(private val environment: SymbolProcessorEnvironment) : Symbol
             if (!it.validate())
                 ret.add(it)
             else
-                it.accept(ipcMethodVisitor, Unit)//处理符号
+                it.accept(ipcMethodVisitor, Unit) // 处理符号
         }
         if (methodMappings.isNotEmpty()) {
             ipcMethodVisitor.generateMappingFile()

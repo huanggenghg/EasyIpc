@@ -1,8 +1,6 @@
 package com.hghuangggeng.democlient
 
-import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,12 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.hghuangggeng.democlient.ui.theme.EasyIPCTheme
-import com.hghuangggeng.easyipc_transport_aidl_client.EasyIpcServiceConnection
+import com.hghuangggeng.easyipc_transport_aidl_client.EasyIpcAIDLClient
 
 class MainActivity : ComponentActivity() {
-
-    private var connection: EasyIpcServiceConnection? = null
-    private var count = 0
+    private val easyIpcClient = EasyIpcAIDLClient();
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -27,7 +23,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             EasyIPCTheme {
                 FilledButtonExample {
-                    connection?.invoke(TestCallParams(11))
+                    easyIpcClient.invoke("call", TestCallParams12(11))
                 }
             }
         }
@@ -35,21 +31,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        val intent = Intent()
-        intent.action = "com.hghuangggeng.easyipc_transport_aidl.EasyIpcService"
-        intent.setPackage("com.hghuangggeng.demoserver")
-        connection = EasyIpcServiceConnection()
-        bindService(intent, connection!!, BIND_AUTO_CREATE).also {
-            Log.i("TAG", "bindService:$it")
-        }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        connection?.let {
-            it.destroy()
-            unbindService(it)
-        }
+        easyIpcClient.start(this, lifecycle)
     }
 }
 

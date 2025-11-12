@@ -6,7 +6,6 @@ import android.os.RemoteException
 import android.util.Log
 import com.hghuangggeng.easyipc_transport_aidl.IEasyIpcCallback
 import com.hghuangggeng.easyipc_transport_aidl.IEasyIpcService
-import com.hghuangggeng.easyipc_transport_aidl.IpcCallUtils
 
 class EasyIpcServiceConnection : IEasyIpcCallback.Stub(), IEasyIpcServiceConnection, IBinder.DeathRecipient {
 
@@ -30,18 +29,8 @@ class EasyIpcServiceConnection : IEasyIpcCallback.Stub(), IEasyIpcServiceConnect
         Log.w(TAG, "onServiceDisconnected: name:${name?.packageName}")
     }
 
-    override fun invoke(param: Any) {
-        val result = easyIpcService?.invoke(
-            IpcCallUtils.prepareRpcCall(
-                "call",
-                params = listOf(param)
-            )
-        )
-        result?.let {
-            Log.i(TAG, "invoke:${String(it)}")
-        } ?: apply {
-            Log.i(TAG, "invoke:result null!")
-        }
+    override fun invoke(requestData: ByteArray?) : ByteArray? {
+        return easyIpcService?.invoke(requestData)
     }
 
     override fun destroy() {

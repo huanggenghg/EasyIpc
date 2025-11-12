@@ -3,6 +3,8 @@ package com.hghuangggeng.easyipc_processor
 import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSFunctionDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
+import com.hghuangggeng.easyipc_annotations.Constants
+import com.hghuangggeng.easyipc_annotations.IMethodRegistry
 import com.hghuangggeng.easyipc_annotations.IpcMethod
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.ClassName
@@ -13,7 +15,6 @@ import com.squareup.kotlinpoet.MUTABLE_MAP
 import com.squareup.kotlinpoet.ParameterSpec
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.TypeSpec
-import com.squareup.kotlinpoet.asClassName
 import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.writeTo
 
@@ -42,8 +43,6 @@ class IpcMethodVisitor(
     }
 
     fun generateMappingFile() {
-        // 1. 定义需要引用的类名
-        val ipcFuncInterface = ClassName("com.hghuangggeng.easyipc_annotations", "IMethodRegistry")
         val injectClass = ClassName("javax.inject", "Inject")
 
         // 2. 生成主构造函数并添加 @Inject
@@ -51,11 +50,10 @@ class IpcMethodVisitor(
             .addAnnotation(injectClass)
             .build()
 
-        // 3. 生成方法实现
+        // 3. 注册方法实现
         val registerMethodBuilder = FunSpec.builder("register")
             .addModifiers(KModifier.OVERRIDE)
             .addParameter(
-
                 ParameterSpec.builder(
                     "map",
                     MUTABLE_MAP
@@ -67,59 +65,61 @@ class IpcMethodVisitor(
         }
 
         // 4. 构建最终的类
-        val generatedClass = TypeSpec.classBuilder("TestIpcMethodProxyImpl")
+        val generatedClass = TypeSpec.classBuilder(Constants.GENERATED_METHOD_REGISTRY_CLASS_NAME)
             .addModifiers(KModifier.PUBLIC)
             .primaryConstructor(constructor) // 设置主构造函数
-            .addSuperinterface(ipcFuncInterface) // 实现接口
+            .addSuperinterface(IMethodRegistry::class) // 实现接口
             .addFunction(registerMethodBuilder.build())
             .build()
 
-        val packageName = "com.hghghgh.text11"
         // 5. 写入 Kotlin 源文件
-        val file = FileSpec.builder(packageName, "TestIpcMethodProxyImpl")
+        val file = FileSpec.builder(
+            Constants.GENERATED_PACKAGE_NAME,
+            Constants.GENERATED_METHOD_REGISTRY_CLASS_NAME
+        )
             .addType(generatedClass)
             .build()
-
-        // 使用 KSP 的 writeTo 方法
-        file.writeTo(environment.codeGenerator, false)
+        file.writeTo(environment.codeGenerator, true)
     }
 
     fun generateHiltModule() {
-        // --- Define Hilt ClassNames by their FQCN strings ---
         val moduleClassName = ClassName("dagger", "Module")
-        val providesClassName = ClassName("dagger", "Provides")
+        val bindsClassName = ClassName("dagger", "Binds")
         val installInClassName = ClassName("dagger.hilt", "InstallIn")
         val singletonComponentClassName = ClassName("dagger.hilt.components", "SingletonComponent")
         val intoSetClassName = ClassName("dagger.multibindings", "IntoSet")
 
-        // Other required classes
-        val generatedRegistryClassName = ClassName("com.hghghgh.text11", "TestIpcMethodProxyImpl")
-        val iMethodRegistryClassName =
-            ClassName("com.hghuangggeng.easyipc_annotations", "IMethodRegistry")
+        val generatedRegistryClassName = ClassName(
+            Constants.GENERATED_PACKAGE_NAME,
+            Constants.GENERATED_METHOD_REGISTRY_CLASS_NAME
+        )
+        val iMethodRegistryClassName = IMethodRegistry::class
 
-        val providesFun = FunSpec.builder("provideIpcFuncA")
-            .addAnnotation(providesClassName)
+        val bindFunc = FunSpec.builder("bind")
+            .addModifiers(KModifier.ABSTRACT)
+            .addAnnotation(bindsClassName)
             .addAnnotation(intoSetClassName)
-            // If you need JvmSuppressWildcards for generic injection issues
-            .addAnnotation(AnnotationSpec.builder(JvmSuppressWildcards::class).build())
             .returns(iMethodRegistryClassName)
-            .addParameter("implA", generatedRegistryClassName)
-            .addStatement("return implA")
+            .addParameter("methodRegistryImpl", generatedRegistryClassName)
             .build()
 
-        val moduleClass = TypeSpec.objectBuilder("BusinessHiltModule")
-            .addAnnotation(moduleClassName)
-            // Use .addMember("%T::class", ...) pattern for @InstallIn
-            .addAnnotation(
-                AnnotationSpec.builder(installInClassName)
-                    .addMember("%T::class", singletonComponentClassName).build()
-            )
-            .addFunction(providesFun)
-            .build()
+        val moduleClass =
+            TypeSpec.classBuilder(Constants.GENERATED_METHOD_REGISTRY_HILT_MODULE_NAME)
+                .addModifiers(KModifier.ABSTRACT)
+                .addAnnotation(moduleClassName)
+                .addAnnotation(
+                    AnnotationSpec.builder(installInClassName)
+                        .addMember("%T::class", singletonComponentClassName).build()
+                )
+                .addFunction(bindFunc)
+                .build()
 
-        FileSpec.builder("com.hghghgh.text11", "BusinessHiltModule")
+        FileSpec.builder(
+            Constants.GENERATED_PACKAGE_NAME,
+            Constants.GENERATED_METHOD_REGISTRY_HILT_MODULE_NAME
+        )
             .addType(moduleClass)
             .build()
-            .writeTo(environment.codeGenerator, false)
+            .writeTo(environment.codeGenerator, true)
     }
 }
