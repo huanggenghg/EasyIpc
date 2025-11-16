@@ -5,5 +5,5 @@ import androidx.lifecycle.Lifecycle
 
 internal interface IEasyIpcClient {
     fun start(context: Context, lifecycle: Lifecycle?)
-    fun invoke(funcName: String, vararg param: Any)
+    fun invoke(funcName: String, vararg param: Any) : Any?
 }

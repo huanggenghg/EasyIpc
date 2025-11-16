@@ -1,6 +1,7 @@
 package com.hghuangggeng.democlient
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,7 +24,13 @@ class MainActivity : ComponentActivity() {
         setContent {
             EasyIPCTheme {
                 FilledButtonExample {
-                    easyIpcClient.invoke("call", TestCallParams12(11))
+                    val result =
+                        easyIpcClient.invoke("call", TestCallParams2(11, "TestCallParams2"))
+                    (result as? TestCallResult)?.let {
+                        Log.i(TAG, "client demo call ipc result:${it.data}")
+                    } ?: let {
+                        Log.i(TAG, "client demo call ipc result: null!")
+                    }
                 }
             }
         }
@@ -32,6 +39,10 @@ class MainActivity : ComponentActivity() {
     override fun onResume() {
         super.onResume()
         easyIpcClient.start(this, lifecycle)
+    }
+
+    companion object {
+        private const val TAG = "MainActivity"
     }
 }
 

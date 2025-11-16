@@ -1,5 +1,5 @@
 package com.hghuangggeng.easyipc_core
 
 interface IEasyIpcServer {
-    fun onInvoke(requestData: ByteArray?)
+    fun onInvoke(requestData: ByteArray?) : ByteArray
 }

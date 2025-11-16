@@ -4,12 +4,15 @@ import com.google.devtools.ksp.processing.SymbolProcessorEnvironment
 import com.google.devtools.ksp.symbol.KSClassDeclaration
 import com.google.devtools.ksp.symbol.KSVisitorVoid
 import com.hghuangggeng.easyipc_annotations.Constants
+import com.hghuangggeng.easyipc_annotations.IIpcDataWrapper
 import com.squareup.kotlinpoet.ClassName
 import com.squareup.kotlinpoet.FileSpec
 import com.squareup.kotlinpoet.FunSpec
 import com.squareup.kotlinpoet.KModifier
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.squareup.kotlinpoet.PropertySpec
 import com.squareup.kotlinpoet.TypeSpec
+import com.squareup.kotlinpoet.asTypeName
 import com.squareup.kotlinpoet.ksp.toClassName
 import com.squareup.kotlinpoet.ksp.writeTo
 
@@ -24,8 +27,10 @@ class IpcDataVisitor(private val environment: SymbolProcessorEnvironment) : KSVi
         val ipcDataWrapperClass =
             ClassName(Constants.GENERATED_PACKAGE_NAME, ipcDataWrapperClassName)
         val originalClass = ClassName(originalPackageName, originalClassName)
-        val typeSpecBuilder = TypeSpec.classBuilder(ipcDataWrapperClassName)
+
+        val classBuilder = TypeSpec.classBuilder(ipcDataWrapperClassName)
             .addModifiers(KModifier.DATA)
+            .addSuperinterface(IIpcDataWrapper::class.asTypeName().parameterizedBy(originalClass))
         val constructorParamsNames = mutableListOf<String>()
         val primaryConstructor = classDeclaration.primaryConstructor
             ?: return environment.logger.error(
@@ -37,7 +42,7 @@ class IpcDataVisitor(private val environment: SymbolProcessorEnvironment) : KSVi
         primaryConstructor.parameters.forEach { parameter ->
             val paramName = parameter.name!!.asString()
             val paramType = parameter.type.resolve().toClassName()
-            typeSpecBuilder.addProperty(
+            classBuilder.addProperty(
                 PropertySpec.builder(paramName, paramType).initializer(paramName).build()
             )
             constructorParamsNames.add(paramName)
@@ -48,14 +53,15 @@ class IpcDataVisitor(private val environment: SymbolProcessorEnvironment) : KSVi
             val paramType = p.type.resolve().toClassName()
             constructorBuilder.addParameter(p.name!!.asString(), paramType)
         }
-        typeSpecBuilder.primaryConstructor(constructorBuilder.build())
+        classBuilder.primaryConstructor(constructorBuilder.build())
 
         // 生成 toOriginal 方法
         val toOriginalFun = FunSpec.builder(Constants.GENERATED_IPC_DATA_WRAPPER_FUNC_TO_ORIGINAL)
+            .addModifiers(KModifier.OVERRIDE)
             .returns(originalClass)
             .addStatement("return %T(%L)", originalClass, constructorParamsNames.joinToString())
             .build()
-        typeSpecBuilder.addFunction(toOriginalFun)
+        classBuilder.addFunction(toOriginalFun)
 
         // 生成 fromOriginal 伴生工厂方法
         val companionSpecBuilder = TypeSpec.companionObjectBuilder()
@@ -72,13 +78,12 @@ class IpcDataVisitor(private val environment: SymbolProcessorEnvironment) : KSVi
                         constructorParamsNames.joinToString { "${Constants.GENERATED_IPC_DATA_WRAPPER_PARAMETER_ORIGINAL}.$it" })
                     .build()
             )
-        typeSpecBuilder.addType(companionSpecBuilder.build())
+        classBuilder.addType(companionSpecBuilder.build())
 
         // 写入文件
         FileSpec.builder(Constants.GENERATED_PACKAGE_NAME, ipcDataWrapperClassName)
-            .addType(typeSpecBuilder.build())
+            .addType(classBuilder.build())
             .build()
             .writeTo(environment.codeGenerator, false, listOf(classDeclaration.containingFile!!))
-
     }
 }

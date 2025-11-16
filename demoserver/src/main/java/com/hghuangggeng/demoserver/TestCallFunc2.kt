@@ -8,4 +8,10 @@ class TestCallFunc2 {
     private fun hello2() {
         Log.i("TEST", "hello")
     }
+
+    @IpcMethod
+    private fun call(params2: TestCallParams2) : TestCallResult {
+        Log.i("TEST", params2.data)
+        return TestCallResult("${params2.data}_ResultForClient")
+    }
 }
