@@ -1,4 +1,4 @@
-package com.hghuangggeng.easyipc_core
+package com.hghuangggeng.easyipc_baseclient
 
 import android.content.Context
 import androidx.lifecycle.Lifecycle

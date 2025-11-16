@@ -13,6 +13,8 @@
             <option value="$PROJECT_DIR$/democlient" />
             <option value="$PROJECT_DIR$/demoserver" />
             <option value="$PROJECT_DIR$/easyipc_annotations" />
+            <option value="$PROJECT_DIR$/easyipc_baseclient" />
+            <option value="$PROJECT_DIR$/easyipc_baseserver" />
             <option value="$PROJECT_DIR$/easyipc_core" />
             <option value="$PROJECT_DIR$/easyipc_processor" />
             <option value="$PROJECT_DIR$/easyipc_transport_aidl" />

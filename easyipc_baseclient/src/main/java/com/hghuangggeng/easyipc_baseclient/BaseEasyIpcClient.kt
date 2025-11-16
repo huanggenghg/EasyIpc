@@ -1,4 +1,6 @@
-package com.hghuangggeng.easyipc_core
+package com.hghuangggeng.easyipc_baseclient
+
+import com.hghuangggeng.easyipc_core.IpcCallUtils
 
 abstract class BaseEasyIpcClient : IEasyIpcClient {
     override fun invoke(funcName: String, vararg param: Any): Any? {

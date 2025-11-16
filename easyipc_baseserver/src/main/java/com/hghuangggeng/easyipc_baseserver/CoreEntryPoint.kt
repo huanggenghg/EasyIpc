@@ -1,4 +1,4 @@
-package com.hghuangggeng.easyipc_core
+package com.hghuangggeng.easyipc_baseserver
 
 import com.hghuangggeng.easyipc_annotations.IMethodRegistry
 import dagger.hilt.EntryPoint

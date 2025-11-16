@@ -3,8 +3,8 @@ package com.hghuangggeng.easyipc_transport_aidl
 import android.content.Context
 import android.os.RemoteCallbackList
 import android.util.Log
-import com.hghuangggeng.easyipc_core.BaseEasyIpcServer
-import com.hghuangggeng.easyipc_core.IEasyIpcServer
+import com.hghuangggeng.easyipc_baseserver.BaseEasyIpcServer
+import com.hghuangggeng.easyipc_baseserver.IEasyIpcServer
 
 class EasyIpcBinder(context: Context) : IEasyIpcService.Stub() {
 

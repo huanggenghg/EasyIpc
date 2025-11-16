@@ -6,8 +6,10 @@ plugins {
 }
 
 android {
-    namespace = "com.hghuangggeng.easyipc_transport_aidl"
-    compileSdk = 36
+    namespace = "com.hghuangggeng.easyipc_baseserver"
+    compileSdk {
+        version = release(36)
+    }
 
     defaultConfig {
         minSdk = 24
@@ -24,9 +26,6 @@ android {
                 "proguard-rules.pro"
             )
         }
-    }
-    buildFeatures {
-        aidl = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
@@ -46,7 +45,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(project(":easyipc_annotations"))
-    api(project(":easyipc_baseserver"))
+    implementation(project(":easyipc_core"))
     // hilt
     implementation("com.google.dagger:hilt-android:2.57.1")
     ksp("com.google.dagger:hilt-android-compiler:2.57.1")

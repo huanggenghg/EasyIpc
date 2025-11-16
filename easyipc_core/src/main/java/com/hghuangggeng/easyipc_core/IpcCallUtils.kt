@@ -1,5 +1,6 @@
 package com.hghuangggeng.easyipc_core
 
+import android.util.Log
 import com.google.protobuf.ByteString
 import com.hghuangggeng.easyipc_annotations.Constants
 import com.hghuangggeng.easyipc_annotations.IIpcDataWrapper
@@ -9,8 +10,10 @@ import java.util.UUID
 import kotlin.jvm.java
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.memberFunctions
+import kotlin.text.isNullOrEmpty
 
 object IpcCallUtils {
+    private const val TAG = "IpcCallUtils"
     fun buildRequest(
         method: String,
         isAsync: Boolean = false,
@@ -36,6 +39,48 @@ object IpcCallUtils {
         val request = requestBuilder.build()
         // Step 4: 外部序列化为原始 byte[]
         return request.toByteArray()
+    }
+
+    fun invoke(requestData: ByteArray?, methodRegistriesMap: Map<String, String>): ByteArray {
+        // Step 1: 外部反序列化 RpcRequest 容器
+        val request = Ipc.IpcRequest.parseFrom(requestData)
+        val methodName = request.methodName
+        val paramTypes = request.parameterTypesList
+        val paramBytes = request.parametersList
+
+        try {
+            // Step 2: 参数类型识别与反序列化（核心反射步骤）
+            val params = convertParams(paramTypes, paramBytes)
+            // Step 3: 反射调用实际业务方法
+            val methodRegistryClassName = methodRegistriesMap[methodName]
+            if (methodRegistryClassName.isNullOrEmpty()) {
+                Log.e(TAG, "onInvoke: service method not found!")
+                return buildErrorResponse(
+                    request.requestId,
+                    "Service method not found"
+                )
+            }
+
+            val result = ReflectionUtil.invokeMethod(
+                methodRegistryClassName,
+                methodName,
+                params
+            )
+            // Step 4: 封装响应并返回
+            return buildSuccessResponse(request.requestId, result)
+        } catch (e: ClassNotFoundException) {
+            Log.e(TAG, "onInvoke: ${e.message}")
+            return buildErrorResponse(
+                request.requestId,
+                "Class not found: ${e.message}"
+            )
+        } catch (e: Exception) {
+            Log.e(TAG, "onInvoke: ${e.message}")
+            return buildErrorResponse(
+                request.requestId,
+                "Deserialization failed: ${e.message}"
+            )
+        }
     }
 
     fun buildErrorResponse(requestId: String, errorMessage: String): ByteArray {
@@ -89,6 +134,29 @@ object IpcCallUtils {
             }
         }
         return originData
+    }
+
+    fun convertParams(paramTypes: List<String>, paramBytes: List<ByteString>): List<Any> {
+        val params = mutableListOf<Any>()
+        // 参数类型识别与反序列化（核心反射步骤）
+        for (i in paramTypes.indices) {
+            val className = paramTypes[i]
+            val bytes = paramBytes[i].toByteArray()
+            // 使用内部序列化工具反序列化具体参数
+            SerializationUtils.fromBytesByClassName(bytes, className)?.let {
+                params.add(it)
+            }
+        }
+
+        val adaptArgs = mutableListOf<Any>()
+        params.forEach {
+            if (it is IIpcDataWrapper<*>) {
+                adaptArgs.add(it.toOriginal() as Any)
+            } else {
+                adaptArgs.add(it)
+            }
+        }
+        return adaptArgs
     }
 
     private fun adaptToIpcDataWrapper(original: Any): Any? {
