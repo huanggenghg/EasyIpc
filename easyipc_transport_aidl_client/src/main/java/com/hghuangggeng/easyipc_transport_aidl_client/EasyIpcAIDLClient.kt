@@ -8,8 +8,9 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.hghuangggeng.easyipc_baseclient.BaseEasyIpcClient
+import javax.inject.Inject
 
-class EasyIpcAIDLClient() : BaseEasyIpcClient(), DefaultLifecycleObserver {
+class EasyIpcAIDLClient @Inject constructor() : BaseEasyIpcClient(), DefaultLifecycleObserver {
     private var connection: EasyIpcServiceConnection? = null
 
     override fun start(context: Context, lifecycle: Lifecycle?) {
@@ -40,6 +41,7 @@ class EasyIpcAIDLClient() : BaseEasyIpcClient(), DefaultLifecycleObserver {
 
     companion object {
         private const val TAG = "EasyIpcAIDLServer"
-        private const val SERVICE_ACTION_NAME = "com.hghuangggeng.easyipc_transport_aidl.EasyIpcService"
+        private const val SERVICE_ACTION_NAME =
+            "com.hghuangggeng.easyipc_transport_aidl.EasyIpcService"
     }
 }

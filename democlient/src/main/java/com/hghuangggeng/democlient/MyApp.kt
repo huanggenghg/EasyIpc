@@ -1,4 +1,4 @@
-package com.hghuangggeng.demoserver
+package com.hghuangggeng.democlient
 
 import android.app.Application
 import dagger.hilt.android.HiltAndroidApp

@@ -13,10 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.hghuangggeng.democlient.ui.theme.EasyIPCTheme
-import com.hghuangggeng.easyipc_transport_aidl_client.EasyIpcAIDLClient
+import com.hghuangggeng.easyipc_baseclient.IEasyIpcClient
+import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    private val easyIpcClient = EasyIpcAIDLClient();
+    @Inject
+    lateinit var easyIpcClient: IEasyIpcClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
