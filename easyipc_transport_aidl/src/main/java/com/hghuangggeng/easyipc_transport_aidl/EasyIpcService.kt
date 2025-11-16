@@ -5,7 +5,6 @@ import android.content.Intent
 import android.os.IBinder
 
 class EasyIpcService : Service() {
-
     override fun onBind(intent: Intent): IBinder {
         return EasyIpcBinder(this)
     }
