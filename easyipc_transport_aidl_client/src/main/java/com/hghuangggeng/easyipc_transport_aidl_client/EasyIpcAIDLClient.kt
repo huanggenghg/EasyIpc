@@ -16,7 +16,6 @@ class EasyIpcAIDLClient @Inject constructor() : BaseEasyIpcClient(), DefaultLife
     override fun start(context: Context, lifecycle: Lifecycle?) {
         lifecycle?.removeObserver(this)
         lifecycle?.addObserver(this)
-
         val intent = Intent()
         intent.action = SERVICE_ACTION_NAME
         intent.setPackage("com.hghuangggeng.demoserver")

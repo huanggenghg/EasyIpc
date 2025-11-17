@@ -19,6 +19,8 @@
             <option value="$PROJECT_DIR$/easyipc_processor" />
             <option value="$PROJECT_DIR$/easyipc_transport_aidl" />
             <option value="$PROJECT_DIR$/easyipc_transport_aidl_client" />
+            <option value="$PROJECT_DIR$/easyipc_transport_contentprovider" />
+            <option value="$PROJECT_DIR$/easyipc_transport_contentprovider_client" />
           </set>
         </option>
       </GradleProjectSettings>
