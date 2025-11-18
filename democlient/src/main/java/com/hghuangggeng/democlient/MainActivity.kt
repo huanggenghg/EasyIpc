@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        easyIpcClient.start(this, lifecycle)
+        easyIpcClient.start(this, "com.hghuangggeng.demoserver")
     }
 
     companion object {

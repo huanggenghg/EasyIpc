@@ -10,7 +10,7 @@ import javax.inject.Inject
 
 class EasyIpcContentProviderClient @Inject constructor() : BaseEasyIpcClient() {
     private lateinit var resolver: ContentResolver
-    private val uri = Uri.parse("content://com.hghuangggeng.easyipc_transport_contentprovider.EasyIpcContentProvider")
+    private lateinit var uri: Uri
 
     override fun invoke(requestData: ByteArray?): ByteArray? {
         val extras = Bundle().apply {
@@ -21,7 +21,8 @@ class EasyIpcContentProviderClient @Inject constructor() : BaseEasyIpcClient() {
         return result?.getByteArray("resultData")
     }
 
-    override fun start(context: Context, lifecycle: Lifecycle?) {
+    override fun start(context: Context, serverPackage: String, lifecycle: Lifecycle?) {
         resolver = context.contentResolver
+        uri = Uri.parse("content://${serverPackage}.EasyIpcContentProvider")
     }
 }

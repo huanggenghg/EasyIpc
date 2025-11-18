@@ -13,12 +13,12 @@ import javax.inject.Inject
 class EasyIpcAIDLClient @Inject constructor() : BaseEasyIpcClient(), DefaultLifecycleObserver {
     private var connection: EasyIpcServiceConnection? = null
 
-    override fun start(context: Context, lifecycle: Lifecycle?) {
+    override fun start(context: Context, serverPackage: String, lifecycle: Lifecycle?) {
         lifecycle?.removeObserver(this)
         lifecycle?.addObserver(this)
         val intent = Intent()
         intent.action = SERVICE_ACTION_NAME
-        intent.setPackage("com.hghuangggeng.demoserver")
+        intent.setPackage(serverPackage)
         connection = EasyIpcServiceConnection()
         context.bindService(intent, connection!!, BIND_AUTO_CREATE).also {
             Log.i(TAG, "bindService:$it")
