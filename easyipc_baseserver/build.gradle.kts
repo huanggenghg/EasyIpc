@@ -45,7 +45,7 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     implementation(project(":easyipc_annotations"))
-    implementation(project(":easyipc_core"))
+    api(project(":easyipc_core"))
     // hilt
     implementation("com.google.dagger:hilt-android:2.57.1")
     ksp("com.google.dagger:hilt-android-compiler:2.57.1")

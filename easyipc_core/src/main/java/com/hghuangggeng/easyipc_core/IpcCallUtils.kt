@@ -41,6 +41,53 @@ object IpcCallUtils {
         return request.toByteArray()
     }
 
+    fun asyncInvoke(requestData: ByteArray?, methodRegistriesMap: Map<String, String>, callback: IEasyIpcRawCallback) {
+        // Step 1: 外部反序列化 RpcRequest 容器
+        val request = Ipc.IpcRequest.parseFrom(requestData)
+        val methodName = request.methodName
+        val paramTypes = request.parameterTypesList
+        val paramBytes = request.parametersList
+
+        try {
+            // Step 2: 反射调用实际业务方法
+            val methodRegistryClassName = methodRegistriesMap[methodName]
+            if (methodRegistryClassName.isNullOrEmpty()) {
+                Log.e(TAG, "onInvoke: service method not found!")
+                callback.onCallback(buildErrorResponse(
+                    request.requestId,
+                    "Service method not found"
+                ))
+                return
+            }
+
+            // Step 3: 参数类型识别与反序列化（核心反射步骤）
+            val params = convertParams(paramTypes, paramBytes)
+            params.add(object : IEasyIpcDataCallback { // 异步调用回调
+                override fun onCallback(data: Any?) {
+                    // Step 4: 封装响应并返回
+                    callback.onCallback(buildSuccessResponse(request.requestId, data))
+                }
+            })
+            ReflectionUtil.invokeMethod(
+                methodRegistryClassName,
+                methodName,
+                params
+            )
+        } catch (e: ClassNotFoundException) {
+            Log.e(TAG, "onInvoke: ${e.message}")
+            callback.onCallback(buildErrorResponse(
+                request.requestId,
+                "Class not found: ${e.message}"
+            ))
+        } catch (e: Exception) {
+            Log.e(TAG, "onInvoke: ${e.message}")
+            callback.onCallback(buildErrorResponse(
+                request.requestId,
+                "Deserialization failed: ${e.message}"
+            ))
+        }
+    }
+
     fun invoke(requestData: ByteArray?, methodRegistriesMap: Map<String, String>): ByteArray {
         // Step 1: 外部反序列化 RpcRequest 容器
         val request = Ipc.IpcRequest.parseFrom(requestData)
@@ -83,7 +130,7 @@ object IpcCallUtils {
         }
     }
 
-    fun buildErrorResponse(requestId: String, errorMessage: String): ByteArray {
+    private fun buildErrorResponse(requestId: String, errorMessage: String): ByteArray {
         return Ipc.IpcResponse.newBuilder()
             .setRequestId(requestId)
             .setErrorMessage(errorMessage)
@@ -91,21 +138,21 @@ object IpcCallUtils {
             .build().toByteArray()
     }
 
-    fun buildSuccessResponse(
+    private fun buildSuccessResponse(
         requestId: String,
-        result: Any
+        result: Any?
     ): ByteArray {
         val responseBuilder = Ipc.IpcResponse.newBuilder()
             .setRequestId(requestId)
             .setIsError(false)
 
         var rawResultBytes: ByteArray
-        if (result.javaClass.isAnnotationPresent(IpcData::class.java)) {
+        if (result?.javaClass?.isAnnotationPresent(IpcData::class.java) == true) {
             val resultIpcDataWrapper = adaptToIpcDataWrapper(result)
             responseBuilder.setResultType(resultIpcDataWrapper?.javaClass?.name)
             rawResultBytes = SerializationUtils.toBytes(resultIpcDataWrapper)
         } else {
-            responseBuilder.setResultType(result.javaClass.name)
+            responseBuilder.setResultType(result?.javaClass?.name)
             rawResultBytes = SerializationUtils.toBytes(result)
         }
         return responseBuilder
@@ -136,7 +183,7 @@ object IpcCallUtils {
         return originData
     }
 
-    fun convertParams(paramTypes: List<String>, paramBytes: List<ByteString>): List<Any> {
+    private fun convertParams(paramTypes: List<String>, paramBytes: List<ByteString>): MutableList<Any> {
         val params = mutableListOf<Any>()
         // 参数类型识别与反序列化（核心反射步骤）
         for (i in paramTypes.indices) {

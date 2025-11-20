@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.hghuangggeng.democlient.ui.theme.EasyIPCTheme
 import com.hghuangggeng.easyipc_baseclient.IEasyIpcClient
+import com.hghuangggeng.easyipc_core.IEasyIpcDataCallback
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -28,13 +29,23 @@ class MainActivity : ComponentActivity() {
         setContent {
             EasyIPCTheme {
                 FilledButtonExample {
-                    val result =
-                        easyIpcClient.invoke("call", TestCallParams2(11, "TestCallParams2"))
-                    (result as? TestCallResult)?.let {
-                        Log.i(TAG, "client demo call ipc result:${it.data}")
-                    } ?: let {
-                        Log.i(TAG, "client demo call ipc result: null!")
-                    }
+//                    val result =
+//                        easyIpcClient.invoke("call", TestCallParams2(11, "TestCallParams2"))
+//                    (result as? TestCallResult)?.let {
+//                        Log.i(TAG, "client demo call ipc result:${it.data}")
+//                    } ?: let {
+//                        Log.i(TAG, "client demo call ipc result: null!")
+//                    }
+                    easyIpcClient.asyncInvoke(
+                        "hello1",
+                        param = emptyArray(),
+                        callback = object : IEasyIpcDataCallback {
+                            override fun onCallback(data: Any?) {
+                                (data as? String).let {
+                                    Log.i(TAG, "client demo call ipc result:$it")
+                                }
+                            }
+                        })
                 }
             }
         }

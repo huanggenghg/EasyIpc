@@ -6,7 +6,9 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.lifecycle.Lifecycle
 import com.hghuangggeng.easyipc_baseclient.BaseEasyIpcClient
+import com.hghuangggeng.easyipc_core.IEasyIpcRawCallback
 import javax.inject.Inject
+import androidx.core.net.toUri
 
 class EasyIpcContentProviderClient @Inject constructor() : BaseEasyIpcClient() {
     private lateinit var resolver: ContentResolver
@@ -21,8 +23,15 @@ class EasyIpcContentProviderClient @Inject constructor() : BaseEasyIpcClient() {
         return result?.getByteArray("resultData")
     }
 
+    override fun asyncInvoke(
+        requestData: ByteArray?,
+        callback: IEasyIpcRawCallback?
+    ) {
+        //
+    }
+
     override fun start(context: Context, serverPackage: String, lifecycle: Lifecycle?) {
         resolver = context.contentResolver
-        uri = Uri.parse("content://${serverPackage}.EasyIpcContentProvider")
+        uri = "content://${serverPackage}.EasyIpcContentProvider".toUri()
     }
 }

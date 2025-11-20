@@ -8,6 +8,8 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import com.hghuangggeng.easyipc_baseclient.BaseEasyIpcClient
+import com.hghuangggeng.easyipc_core.IEasyIpcRawCallback
+import com.hghuangggeng.easyipc_transport_aidl.IEasyIpcCallback
 import javax.inject.Inject
 
 class EasyIpcAIDLClient @Inject constructor() : BaseEasyIpcClient(), DefaultLifecycleObserver {
@@ -29,11 +31,17 @@ class EasyIpcAIDLClient @Inject constructor() : BaseEasyIpcClient(), DefaultLife
         return connection?.invoke(requestData)
     }
 
+    override fun asyncInvoke(requestData: ByteArray?, callback: IEasyIpcRawCallback?) {
+        connection?.asyncInvoke(requestData, object : IEasyIpcCallback.Stub() {
+            override fun onCallback(data: ByteArray?) {
+                callback?.onCallback(data)
+            }
+        })
+    }
 
     override fun onDestroy(owner: LifecycleOwner) {
         super.onDestroy(owner)
         connection?.let {
-            it.destroy()
             (owner as? Context)?.unbindService(it)
         }
     }

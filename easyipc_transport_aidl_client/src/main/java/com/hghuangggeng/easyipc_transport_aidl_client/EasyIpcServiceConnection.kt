@@ -19,7 +19,6 @@ class EasyIpcServiceConnection : IEasyIpcCallback.Stub(), IEasyIpcServiceConnect
         easyIpcService = IEasyIpcService.Stub.asInterface(service)
         try {
             easyIpcService?.asBinder()?.linkToDeath(this, 0)
-            easyIpcService?.registerCallback(this)
         } catch (e: RemoteException) {
             e.printStackTrace()
         }
@@ -33,14 +32,8 @@ class EasyIpcServiceConnection : IEasyIpcCallback.Stub(), IEasyIpcServiceConnect
         return easyIpcService?.invoke(requestData)
     }
 
-    override fun destroy() {
-        if (easyIpcService?.asBinder()?.isBinderAlive == true) {
-            try {
-                easyIpcService?.unregisterCallback(this)
-            } catch (e: RemoteException) {
-                Log.e(TAG, "destroy:unregisterCallback:${e.message}")
-            }
-        }
+    override fun asyncInvoke(requestData: ByteArray?, callback: IEasyIpcCallback?) {
+        easyIpcService?.asyncInvoke(requestData, callback)
     }
 
     override fun binderDied() {
