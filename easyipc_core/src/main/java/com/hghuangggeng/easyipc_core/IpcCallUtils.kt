@@ -7,20 +7,19 @@ import com.hghuangggeng.easyipc_annotations.IIpcDataWrapper
 import com.hghuangggeng.easyipc_annotations.IpcData
 import com.huanggenghg.easyipc_transport_aidl.Ipc
 import java.util.UUID
-import kotlin.jvm.java
 import kotlin.reflect.full.companionObject
 import kotlin.reflect.full.memberFunctions
-import kotlin.text.isNullOrEmpty
 
 object IpcCallUtils {
     private const val TAG = "IpcCallUtils"
     fun buildRequest(
         method: String,
+        requestId: String? = null,
         isAsync: Boolean = false,
         params: List<Any> = emptyList()
     ): ByteArray? {
         val requestBuilder = Ipc.IpcRequest.newBuilder()
-            .setRequestId(UUID.randomUUID().toString())
+            .setRequestId(requestId ?: UUID.randomUUID().toString())
             .setMethodName(method)
             .setIsAsync(isAsync)
         for (p in params) {
@@ -41,7 +40,11 @@ object IpcCallUtils {
         return request.toByteArray()
     }
 
-    fun asyncInvoke(requestData: ByteArray?, methodRegistriesMap: Map<String, String>, callback: IEasyIpcRawCallback) {
+    fun asyncInvoke(
+        requestData: ByteArray?,
+        methodRegistriesMap: Map<String, String>,
+        callback: IEasyIpcRawCallback
+    ) {
         // Step 1: 外部反序列化 RpcRequest 容器
         val request = Ipc.IpcRequest.parseFrom(requestData)
         val methodName = request.methodName
@@ -53,10 +56,12 @@ object IpcCallUtils {
             val methodRegistryClassName = methodRegistriesMap[methodName]
             if (methodRegistryClassName.isNullOrEmpty()) {
                 Log.e(TAG, "onInvoke: service method not found!")
-                callback.onCallback(buildErrorResponse(
-                    request.requestId,
-                    "Service method not found"
-                ))
+                callback.onCallback(
+                    buildErrorResponse(
+                        request.requestId,
+                        "Service method not found"
+                    ), request.requestId
+                )
                 return
             }
 
@@ -65,7 +70,10 @@ object IpcCallUtils {
             params.add(object : IEasyIpcDataCallback { // 异步调用回调
                 override fun onCallback(data: Any?) {
                     // Step 4: 封装响应并返回
-                    callback.onCallback(buildSuccessResponse(request.requestId, data))
+                    callback.onCallback(
+                        buildSuccessResponse(request.requestId, data),
+                        request.requestId
+                    )
                 }
             })
             ReflectionUtil.invokeMethod(
@@ -75,16 +83,20 @@ object IpcCallUtils {
             )
         } catch (e: ClassNotFoundException) {
             Log.e(TAG, "onInvoke: ${e.message}")
-            callback.onCallback(buildErrorResponse(
-                request.requestId,
-                "Class not found: ${e.message}"
-            ))
+            callback.onCallback(
+                buildErrorResponse(
+                    request.requestId,
+                    "Class not found: ${e.message}"
+                ), request.requestId
+            )
         } catch (e: Exception) {
             Log.e(TAG, "onInvoke: ${e.message}")
-            callback.onCallback(buildErrorResponse(
-                request.requestId,
-                "Deserialization failed: ${e.message}"
-            ))
+            callback.onCallback(
+                buildErrorResponse(
+                    request.requestId,
+                    "Deserialization failed: ${e.message}"
+                ), request.requestId
+            )
         }
     }
 
@@ -183,7 +195,10 @@ object IpcCallUtils {
         return originData
     }
 
-    private fun convertParams(paramTypes: List<String>, paramBytes: List<ByteString>): MutableList<Any> {
+    private fun convertParams(
+        paramTypes: List<String>,
+        paramBytes: List<ByteString>
+    ): MutableList<Any> {
         val params = mutableListOf<Any>()
         // 参数类型识别与反序列化（核心反射步骤）
         for (i in paramTypes.indices) {

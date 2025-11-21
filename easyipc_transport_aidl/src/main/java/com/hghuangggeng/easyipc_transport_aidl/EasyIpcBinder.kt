@@ -17,7 +17,7 @@ class EasyIpcBinder(context: Context) : IEasyIpcService.Stub() {
         callback: IEasyIpcCallback?
     ) {
         easyIpcServer.onAsyncInvoke(requestData, object : IEasyIpcRawCallback {
-            override fun onCallback(data: ByteArray?) {
+            override fun onCallback(data: ByteArray?, requestId: String) {
                 callback?.onCallback(data)
             }
         })

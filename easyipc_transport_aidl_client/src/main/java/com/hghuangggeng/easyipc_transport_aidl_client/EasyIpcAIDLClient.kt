@@ -31,10 +31,14 @@ class EasyIpcAIDLClient @Inject constructor() : BaseEasyIpcClient(), DefaultLife
         return connection?.invoke(requestData)
     }
 
-    override fun asyncInvoke(requestData: ByteArray?, callback: IEasyIpcRawCallback?) {
+    override fun asyncInvoke(
+        requestData: ByteArray?,
+        requestId: String,
+        callback: IEasyIpcRawCallback?
+    ) {
         connection?.asyncInvoke(requestData, object : IEasyIpcCallback.Stub() {
             override fun onCallback(data: ByteArray?) {
-                callback?.onCallback(data)
+                callback?.onCallback(data, requestId)
             }
         })
     }

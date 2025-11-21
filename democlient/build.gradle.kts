@@ -59,8 +59,8 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
-    implementation(project(":easyipc_transport_aidl_client"))
-//    implementation(project(":easyipc_transport_contentprovider_client"))
+//    implementation(project(":easyipc_transport_aidl_client"))
+    implementation(project(":easyipc_transport_contentprovider_client"))
     implementation(project(":easyipc_processor"))//引入刚才新建的ksp model
     ksp(project(":easyipc_processor"))
 
