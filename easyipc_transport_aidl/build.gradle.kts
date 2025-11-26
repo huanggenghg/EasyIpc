@@ -1,9 +1,8 @@
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("com.vanniktech.maven.publish")
 }
-
-apply(from = "${rootProject.rootDir}/publish.gradle.kts")
 
 android {
     namespace = "com.hghuangggeng.easyipc_transport_aidl"

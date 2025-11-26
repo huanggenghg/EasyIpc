@@ -1,8 +1,7 @@
 plugins {
     kotlin("jvm")
+    id("com.vanniktech.maven.publish")
 }
-
-apply(from = "${rootProject.rootDir}/publish.gradle.kts")
 
 dependencies {
     testImplementation(libs.junit)

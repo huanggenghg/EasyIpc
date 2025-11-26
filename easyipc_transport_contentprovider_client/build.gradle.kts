@@ -3,9 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
     id("com.google.devtools.ksp") version "2.2.10-2.0.2"// 引入ksp插件
     id("com.google.dagger.hilt.android")
+    id("com.vanniktech.maven.publish")
 }
-
-apply(from = "${rootProject.rootDir}/publish.gradle.kts")
 
 android {
     namespace = "com.hghuangggeng.easyipc_transport_contentprovider_client"

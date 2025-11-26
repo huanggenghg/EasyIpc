@@ -6,9 +6,8 @@ plugins {
     id("com.google.protobuf") version "0.9.5"
     id("com.google.devtools.ksp") version "2.2.10-2.0.2"// 引入ksp插件
     id("com.google.dagger.hilt.android")
+    id("com.vanniktech.maven.publish")
 }
-
-apply(from = "${rootProject.rootDir}/publish.gradle.kts")
 
 android {
     namespace = "com.hghuangggeng.app_client"
