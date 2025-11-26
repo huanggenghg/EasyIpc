@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.kotlin.android)
 }
 
+apply(from = "${rootProject.rootDir}/publish.gradle.kts")
+
 android {
     namespace = "com.hghuangggeng.easyipc_baseclient"
     compileSdk {

@@ -5,6 +5,8 @@ plugins {
     id("com.google.dagger.hilt.android")
 }
 
+apply(from = "${rootProject.rootDir}/publish.gradle.kts")
+
 android {
     namespace = "com.hghuangggeng.easyipc_baseserver"
     compileSdk {

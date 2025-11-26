@@ -21,7 +21,7 @@ import com.squareup.kotlinpoet.ksp.writeTo
 class IpcMethodVisitor(
     private val environment: SymbolProcessorEnvironment,
     private val mappings: MutableMap<String, String>
-) : KSVisitorVoid() { //todo 增量（类内增加方法）好像有问题
+) : KSVisitorVoid() {
 
     override fun visitFunctionDeclaration(function: KSFunctionDeclaration, data: Unit) {
         environment.logger.warn("visitFunctionDeclaration:")
