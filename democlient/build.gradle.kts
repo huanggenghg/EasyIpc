@@ -60,9 +60,9 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
 //    implementation(project(":easyipc_transport_aidl_client"))
-    implementation(project(":easyipc_transport_contentprovider_client"))
-    implementation(project(":easyipc_processor"))//引入刚才新建的ksp model
-    ksp(project(":easyipc_processor"))
+    implementation("com.github.huanggenghg.EasyIpc:easyipc_transport_contentprovider_client:v0.0.7")
+    compileOnly("com.github.huanggenghg.EasyIpc:easyipc_processor:v0.0.7")//引入刚才新建的ksp model
+    ksp("com.github.huanggenghg.EasyIpc:easyipc_processor:v0.0.7")
 
     // 注入 client 需要
     implementation("com.google.dagger:hilt-android:2.57.1")
