@@ -1,5 +1,5 @@
 group = "com.huanggenghg.easyipc"
-version = "0.0.1"
+version = "0.0.7"
 
 plugins {
     alias(libs.plugins.android.application) apply false
