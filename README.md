@@ -3,12 +3,12 @@
 ### 原理
 
 ![easyipc_architecture](pics/easyipc_architecture.drawio.png)
-1. 跨进程调用接口收敛至一个函数`invoke`中，作为跨进程通道，在 Server 端通过参数数据分发调用到真正的接口函数；
-2. ksp 注解实现调用接口参数序列化，生成统一包路径下的协议数据包装类，需保证 Client 及 Server
-   端都存在对应注解的数据类，作为协议保证，保证 IPC 调用成功；
+1. 跨进程调用接口收敛至函数`invoke`和`asynvInvoke`中，作为跨进程通道，在 Server 端通过参数数据分发调用到真正的接口函数；
+2. ksp 注解实现**调用接口参数**及**返回结果数据**的序列化，生成统一包路径下的协议数据包装类，需保证 Client 及 Server
+   端都存在对应注解的数据类，作为数据协议保证，保证 IPC 调用成功；
 3. ksp + hilt 实现 Server 端跨进程方法的的映射分发，注解在业务 Server
-   端定义跨进程方法，由内部核心模块进行跨进程方法参数的放序列化解析，`invoke`\\`syncInvoke`
-   时再根据对应方法进行分发。
+   端定义跨进程方法，由内部核心模块进行注册分发，`invoke`\\`syncInvoke`
+   时再根据方法名对应方法所在类路径进行反射调用;
 
 ### 快速使用
 
@@ -48,13 +48,17 @@ dependencies {
 @HiltAndroidApp
 class MyApp : Application() // hilt 配置
 
-// 跨进程数据
+// 跨进程数据定义
 @IpcData
 data class TestCallParams2(val value: Int, val data: String)
 @IpcData
 data class TestCallResult(val data: String)
-
-@AndroidEntryPoint
+```
+```kotlin
+easyIpcClient.start(this, "com.hghuangggeng.demoserver") // “启动服务端”
+```
+```kotlin
+@AndroidEntryPoint // hilt Activity 配置
 class MainActivity : ComponentActivity() {
     //...
     @Inject
