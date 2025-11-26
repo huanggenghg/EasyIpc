@@ -1,2 +1,4 @@
 jdk:
   - openjdk17
+script:
+  - ./gradlew clean -Pgroup=com.github.huanggenghg -Pversion=v0.0.4 -xtest -xlint assembleRelease publishToMavenLocal
